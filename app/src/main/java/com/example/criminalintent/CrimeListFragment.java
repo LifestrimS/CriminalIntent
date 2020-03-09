@@ -1,12 +1,12 @@
 package com.example.criminalintent;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -44,12 +44,26 @@ public class CrimeListFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        if(mAdapter == null) {
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        } else {
+            mAdapter.notifyDataSetChanged();
+            //mAdapter.notifyItemChanged();
+
+        }
     }
+
+    ///////////////////////////////////HOLDER///////////////////////////////////
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -60,7 +74,7 @@ public class CrimeListFragment extends Fragment {
 
         DateFormat df = DateFormat.getDateInstance(DateFormat.FULL);
 
-        public CrimeHolder (LayoutInflater inflater, ViewGroup parent) {
+        CrimeHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.list_item_crime, parent, false));
 
             mTitleTextView = itemView.findViewById(R.id.crime_title);
@@ -69,7 +83,7 @@ public class CrimeListFragment extends Fragment {
             itemView.setOnClickListener(this);
         }
 
-        public void bind(Crime crime) {
+        void bind(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(mCrime.getTitle());
             mDateTextView.setText(df.format(mCrime.getDate()));
@@ -78,15 +92,17 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Toast.makeText(getActivity(),mCrime.getTitle() + " clicked!", Toast.LENGTH_SHORT)
-                    .show();
+            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getId());
+            startActivity(intent);
         }
     }
+
+    ///////////////////////////////////ADAPTER///////////////////////////////////
 
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
         private List<Crime> mCrimes;
 
-        public CrimeAdapter(List<Crime> crimes) {
+        CrimeAdapter(List<Crime> crimes) {
             mCrimes = crimes;
         }
 

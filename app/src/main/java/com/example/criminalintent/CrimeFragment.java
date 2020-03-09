@@ -15,6 +15,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import java.text.DateFormat;
+import java.util.List;
+import java.util.UUID;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -23,6 +27,7 @@ public class CrimeFragment extends Fragment {
 
     private Unbinder unbinder;
     private Crime mCrime;
+    private static final String ARG_CRIME_ID = "crime_id";
 
     @BindView(R.id.crime_title)
     EditText mTitleField;
@@ -36,7 +41,8 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCrime = new Crime();
+        UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
+        mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
     }
 
     @Nullable
@@ -44,7 +50,9 @@ public class CrimeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
         unbinder = ButterKnife.bind(this, view);
+        DateFormat df = DateFormat.getDateInstance(DateFormat.FULL);
 
+        mTitleField.setText(mCrime.getTitle());
         mTitleField.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -62,13 +70,24 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        mDateButton.setText(mCrime.getDate().toString());
+        mDateButton.setText((df.format(mCrime.getDate())));
         mDateButton.setEnabled(false);
 
+        mSolvedCheckBox.setChecked(mCrime.isSolved());
         mSolvedCheckBox.setOnCheckedChangeListener(
                 (buttonView, isChecked) -> mCrime.setSolved(isChecked));
 
         return view;
+    }
+
+
+    public static CrimeFragment newInstance(UUID crimeId) {
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_CRIME_ID, crimeId);
+
+        CrimeFragment fragment = new CrimeFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
