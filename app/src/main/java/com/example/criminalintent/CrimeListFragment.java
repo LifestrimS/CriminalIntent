@@ -4,13 +4,16 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DateFormat;
 import java.util.List;
 
 import butterknife.BindView;
@@ -52,20 +55,25 @@ public class CrimeListFragment extends Fragment {
 
         private TextView mTitleTextView;
         private TextView mDateTextView;
+        private ImageView mSolvedImageView;
         private Crime mCrime;
+
+        DateFormat df = DateFormat.getDateInstance(DateFormat.FULL);
 
         public CrimeHolder (LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.list_item_crime, parent, false));
 
             mTitleTextView = itemView.findViewById(R.id.crime_title);
             mDateTextView = itemView.findViewById(R.id.crime_date);
+            mSolvedImageView = itemView.findViewById(R.id.crime_solved);
             itemView.setOnClickListener(this);
         }
 
         public void bind(Crime crime) {
             mCrime = crime;
             mTitleTextView.setText(mCrime.getTitle());
-            mDateTextView.setText(mCrime.getDate().toString());
+            mDateTextView.setText(df.format(mCrime.getDate()));
+            mSolvedImageView.setVisibility(crime.isSolved() ? View.VISIBLE : View.GONE);
         }
 
         @Override
@@ -82,8 +90,9 @@ public class CrimeListFragment extends Fragment {
             mCrimes = crimes;
         }
 
+        @NonNull
         @Override
-        public CrimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
             return new CrimeHolder(layoutInflater, parent);
         }
