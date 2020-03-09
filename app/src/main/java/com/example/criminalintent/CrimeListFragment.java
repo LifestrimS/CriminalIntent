@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -54,13 +55,13 @@ public class CrimeListFragment extends Fragment {
         private TextView mDateTextView;
         private Crime mCrime;
 
-        public CrimeHolder (LayoutInflater inflater, ViewGroup parent) {
-            super(inflater.inflate(R.layout.list_item_crime, parent, false));
-
-            mTitleTextView = itemView.findViewById(R.id.crime_title);
+        public CrimeHolder(View v){
+            super(v);
             mDateTextView = itemView.findViewById(R.id.crime_date);
+            mTitleTextView = itemView.findViewById(R.id.crime_title);
             itemView.setOnClickListener(this);
         }
+
 
         public void bind(Crime crime) {
             mCrime = crime;
@@ -77,21 +78,44 @@ public class CrimeListFragment extends Fragment {
 
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
         private List<Crime> mCrimes;
+        private final int TYPE1 = 1; //Required
+        private final int TYPE2 = 2; //NoRequired
 
         public CrimeAdapter(List<Crime> crimes) {
             mCrimes = crimes;
         }
 
+        @NonNull
         @Override
-        public CrimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            return new CrimeHolder(layoutInflater, parent);
+        public CrimeHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view;
+            switch (viewType) {
+                case TYPE1:
+                    view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_crime_2, parent, false);
+                    break;
+                case TYPE2:
+                    view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_crime, parent, false);
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + viewType);
+            }
+            //LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+            return new CrimeHolder(view);
         }
 
         @Override
         public void onBindViewHolder(CrimeHolder holder, int position) {
             Crime crime = mCrimes.get(position);
             holder.bind(crime);
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position % 2 == 0) {
+                return TYPE1;
+            } else {
+                return TYPE2;
+            }
         }
 
         @Override
